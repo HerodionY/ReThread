@@ -56,6 +56,28 @@ public ResponseEntity<Map<String, Object>> getUserById(@PathVariable UUID id) {
     }
 }
 
+@GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchUserByUsername(@RequestParam String username) {
+        Map<String, Object> response = new HashMap<>();
+        User user = userService.getUserByUsername(username);  // Menambahkan metode pencarian berdasarkan username
+
+        if (user != null) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", user);
+
+            response.put("code", "200");
+            response.put("message", "User found successfully");
+            response.put("data", data);
+
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("code", "404");
+            response.put("message", "User not found");
+            return ResponseEntity.status(404).body(response);
+        }
+    }
+
+
 
     // Tambahkan metode lain sesuai kebutuhan
 }

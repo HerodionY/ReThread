@@ -25,5 +25,13 @@ public class Like {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Like() {}
+
+    // Constructor untuk memudahkan pembuatan like
+    public Like(Post post, User user) {
+        this.post = post;
+        this.user = user;
+    }
+
     // Getter dan Setter
 }

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.Set;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Getter
@@ -22,7 +23,7 @@ public class Post {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     
@@ -33,8 +34,8 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private Set<Comment> comments;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<Like> likes;
@@ -43,6 +44,10 @@ public class Post {
         IMAGE,
         VIDEO,
         TEXT
+    }
+
+    public Post(UUID id) {
+        this.id = id;
     }
 
     

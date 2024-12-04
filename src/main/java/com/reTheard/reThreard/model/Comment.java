@@ -1,9 +1,10 @@
 package com.reTheard.reThreard.model;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -16,15 +17,20 @@ public class Comment {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false, length = 500)
     private String content;
 
-    // Getter dan Setter
-}
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
+    // Constructors, if needed
+
+    
+}
