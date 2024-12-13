@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @RestController
@@ -89,20 +90,23 @@ public ResponseEntity<Map<String, Object>> addComment(@RequestBody CommentDTO co
 
 
     @GetMapping("/{postId}")
-    public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable UUID postId) {
-        Map<String, Object> response = new HashMap<>();
-        List<Comment> comments = commentService.getCommentsByPostId(postId);
+public ResponseEntity<Map<String, Object>> getCommentsByPostId(@PathVariable UUID postId) {
+    Map<String, Object> response = new HashMap<>();
+    List<Comment> comments = commentService.getCommentsByPostId(postId);
 
-        if (comments != null && !comments.isEmpty()) {
-            response.put("code", "200");
-            response.put("message", "Comments retrieved successfully");
-            return ResponseEntity.ok(comments);
-        } else {
-            response.put("code", "404");            
-            response.put("message", "No comments found for this post");
-            return ResponseEntity.status(404).body(comments);
-        }
+    if (comments != null && !comments.isEmpty()) {
+        response.put("code", "200");
+        response.put("message", "Comments retrieved successfully");
+        response.put("data", comments);
+        return ResponseEntity.ok(response);
+    } else {
+        response.put("code", "404");
+        response.put("message", "No comments found for this post");
+        response.put("data", new ArrayList<>());  // Return empty list if no comments found
+        return ResponseEntity.status(404).body(response);
     }
+}
+
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable UUID commentId) {
