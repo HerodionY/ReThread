@@ -32,5 +32,15 @@ public class Comment {
 
     // Constructors, if needed
 
+    // Default constructor
+    public Comment() {}
+
+    // Constructor with content, post, and user
+    public Comment(Post post, User user, String content) {
+        this.post = post;
+        this.user = user;
+        this.content = content;
+    }
+
     
 }

@@ -1,7 +1,13 @@
 package com.reTheard.reThreard.controller;
 
 import com.reTheard.reThreard.model.Comment;
+import com.reTheard.reThreard.model.Post;
+import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.CommentService;
+import com.reTheard.reThreard.service.PostService;
+import com.reTheard.reThreard.service.UserService;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 @RestController
@@ -19,24 +26,26 @@ public class CommentController {
     private CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<Comment> addComment(@RequestBody Comment comment) {
-        Map<String, Object> response = new HashMap<>();
-
-        Comment savedComment = commentService.addComment(comment);
-        if(savedComment != null) {
-            response.put("code", "200");
-            response.put("message", "Comment added successfully");
-            return ResponseEntity.ok(savedComment);
-        }
-        else {
-            response.put("code", "400");
-            response.put("message", "Invalid comment data");
-            return ResponseEntity.badRequest().body(comment);
-        }
-
-        
-        
+public ResponseEntity<Comment> addComment(@RequestBody Comment comment) {
+    Post post = postService.findById(comment.getPost().getId());
+    User user = userService.findById(comment.getUser().getId());
+    
+    if (post == null || user == null) {
+        return ResponseEntity.status(400).body(null);  // Bad Request if Post or User not found
     }
+
+    comment.setPost(post);
+    comment.setUser(user);
+    comment.setCreatedAt(LocalDateTime.now());
+
+    Comment savedComment = commentService.addComment(comment);
+    if(savedComment != null) {
+        return ResponseEntity.ok(savedComment);
+    } else {
+        return ResponseEntity.badRequest().body(comment);
+    }
+}
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable UUID postId) {

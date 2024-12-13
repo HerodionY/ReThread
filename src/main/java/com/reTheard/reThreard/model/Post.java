@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.springframework.cglib.core.Local;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Getter;
 import lombok.Setter;
 import java.util.Set;
@@ -24,6 +26,7 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     
