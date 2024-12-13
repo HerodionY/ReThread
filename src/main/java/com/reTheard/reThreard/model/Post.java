@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.cglib.core.Local;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -38,9 +39,11 @@ public class Post {
     private MediaType mediaType;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Set<Like> likes;
 
     public enum MediaType {

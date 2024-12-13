@@ -6,7 +6,7 @@ import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.CommentService;
 import com.reTheard.reThreard.service.PostService;
 import com.reTheard.reThreard.service.UserService;
-
+import com.reTheard.reThreard.dto.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,26 +25,67 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @PostMapping
-public ResponseEntity<Comment> addComment(@RequestBody Comment comment) {
-    Post post = postService.findById(comment.getPost().getId());
-    User user = userService.findById(comment.getUser().getId());
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private UserService userService;
+
     
-    if (post == null || user == null) {
-        return ResponseEntity.status(400).body(null);  // Bad Request if Post or User not found
-    }
+    @PostMapping
+public ResponseEntity<Map<String, Object>> addComment(@RequestBody CommentDTO commentDTO) {
+    Map<String, Object> response = new HashMap<>();
+    Map<String, Object> data = new HashMap<>();
 
-    comment.setPost(post);
-    comment.setUser(user);
-    comment.setCreatedAt(LocalDateTime.now());
+    try {
+        Post post = postService.getPostById(commentDTO.getPostId());
+        User user = userService.getUserById(commentDTO.getUserId());
 
-    Comment savedComment = commentService.addComment(comment);
-    if(savedComment != null) {
-        return ResponseEntity.ok(savedComment);
-    } else {
-        return ResponseEntity.badRequest().body(comment);
+        if (post == null) {
+            response.put("code", "404");
+            response.put("message", "Post not found");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        if (user == null) {
+            response.put("code", "404");
+            response.put("message", "User not found");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        Comment comment = new Comment();
+        comment.setPost(post);
+        comment.setUser(user);
+        comment.setContent(commentDTO.getContent());
+        comment.setCreatedAt(LocalDateTime.now());
+
+        Comment savedComment = commentService.addComment(comment);
+
+        if (savedComment != null) {
+            data.put("comment", savedComment);
+            response.put("code", "200");
+            response.put("message", "Comment added successfully");
+            response.put("data", data);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("code", "500");
+            response.put("message", "Failed to add comment");
+            return ResponseEntity.status(500).body(response);
+        }
+    } catch (Exception e) {
+        response.put("code", "500");
+        response.put("message", "An unexpected error occurred");
+        response.put("error", e.getMessage());
+        return ResponseEntity.status(500).body(response);
     }
 }
+
+
+
+
+
+    
+
 
 
     @GetMapping("/{postId}")
@@ -61,8 +102,6 @@ public ResponseEntity<Comment> addComment(@RequestBody Comment comment) {
             response.put("message", "No comments found for this post");
             return ResponseEntity.status(404).body(comments);
         }
-
-        
     }
 
     @DeleteMapping("/{commentId}")
