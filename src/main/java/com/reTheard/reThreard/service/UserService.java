@@ -28,6 +28,10 @@ public class UserService {
         return user.orElse(null); // Mengembalikan null jika pengguna tidak ditemukan
     }
 
+    public Optional<User> getUserByUser(String username) {
+        return userRepository.findByUsername(username);
+    }
+
 
     // Tambahkan metode lain sesuai kebutuhan
 }
