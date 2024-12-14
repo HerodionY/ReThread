@@ -124,6 +124,22 @@ public ResponseEntity<Map<String, Object>> createPost(@RequestBody PostRequest p
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/delete-post/{id}")
+    public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
+        Map<String, Object> response = new HashMap<>();
+        postService.deletePost(id);
+        if(id != null) {
+            response.put("code", "200");            
+            response.put("message", "Post deleted successfully");
+            return ResponseEntity.ok().build();
+        }else{
+            response.put("code", "404");            
+            response.put("message", "Post not found");
+            return ResponseEntity.status(404).build();
+        }
+        
+    }
 }
 
 

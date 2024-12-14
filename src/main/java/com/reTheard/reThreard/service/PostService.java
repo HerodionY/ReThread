@@ -52,4 +52,8 @@ public class PostService {
             throw new RuntimeException("Post not found with ID: " + post.getId());
         }
     }
+
+    public void deletePost(UUID id) {
+        postRepository.deleteById(id);
+    }
 }
