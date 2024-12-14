@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,4 +19,11 @@ public class UserDTO {
     private String email;
     private String profilePicture;
     private String bio;
+    private List<PostRequest> posts;
+
+    public UserDTO(UUID Id, String username) {
+        this.id = Id;
+        this.username = username;
+    }
+
 }

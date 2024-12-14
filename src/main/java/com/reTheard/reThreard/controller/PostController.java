@@ -10,6 +10,8 @@ import com.reTheard.reThreard.model.Post;
 import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.UserService;
 import com.reTheard.reThreard.dto.PostResponse;
+import com.reTheard.reThreard.dto.UserDTO;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -33,36 +35,55 @@ public class PostController {
 
     @PostMapping("/create-post")
 public ResponseEntity<Map<String, Object>> createPost(@RequestBody PostRequest postRequest) {
-    // Map postRequest to a Post entity
-    Post post = new Post();
-    post.setCaption(postRequest.getCaption());
-    post.setMediaUrl(postRequest.getMediaUrl());
-    post.setCreatedAt(LocalDateTime.now());
-    // Assuming postRequest.getMediaType() returns a String
-    String mediaTypeString = postRequest.getMediaType();
+    try {
+        // Log incoming request
+        System.out.println("Request received: " + postRequest);
 
-    // Convert the String to the enum (this will throw IllegalArgumentException if the string is invalid)
-    Post.MediaType mediaType = Post.MediaType.valueOf(mediaTypeString.toUpperCase());
+        // Map request to Post
+        Post post = new Post();
+        post.setCaption(postRequest.getCaption());
+        post.setMediaUrl(postRequest.getMediaUrl());
+        post.setCreatedAt(LocalDateTime.now());
+        System.out.println("Mapped post: " + post);
 
-    // Set the converted enum value to the Post object
-    post.setMediaType(mediaType);
-    
-    User user = userService.getUserById(postRequest.getUserId());
-    if (user == null) {
-        return ResponseEntity.status(404).body(Map.of("code", "404", "message", "User not found"));
+        // Validate media type
+        String mediaTypeString = postRequest.getMediaType();
+        try {
+            Post.MediaType mediaType = Post.MediaType.valueOf(mediaTypeString.toUpperCase());
+            post.setMediaType(mediaType);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid media type: " + mediaTypeString);
+            return ResponseEntity.status(400).body(Map.of("code", "400", "message", "Invalid media type"));
+        }
+
+        // Validate user
+        User user = userService.getUserById(postRequest.getUserId());
+        if (user == null) {
+            System.err.println("User not found for ID: " + postRequest.getUserId());
+            return ResponseEntity.status(404).body(Map.of("code", "404", "message", "User not found"));
+        }
+        post.setUser(user);
+        System.out.println("User validated: " + user);
+
+        // Save post
+        Post createdPost = postService.createPost(post);
+        if (createdPost == null) {
+            System.err.println("Failed to create post");
+            return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Failed to create post"));
+        }
+
+        // Success response
+        System.out.println("Post created successfully: " + createdPost);
+        PostResponse postResponse = new PostResponse(createdPost);
+        return ResponseEntity.ok(Map.of("code", "200", "message", "Post created successfully", "data", postResponse));
+
+    } catch (Exception e) {
+        e.printStackTrace(); // Log full stack trace
+        return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Internal server error"));
     }
-    
-    post.setUser(user);
-    Post createdPost = postService.createPost(post);
-    
-    if (createdPost == null) {
-        return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Failed to create post"));
-    }
-    
-    // Map Post to PostResponse and return
-    PostResponse postResponse = new PostResponse(createdPost);
-    return ResponseEntity.ok(Map.of("code", "200", "message", "Post created successfully", "data", postResponse));
 }
+
+
 
 
 
@@ -117,10 +138,45 @@ public ResponseEntity<Map<String, Object>> createPost(@RequestBody PostRequest p
 
         List<Post> posts = postService.getAllPosts(page, size, sortBy);
 
-        data.put("posts", posts);
+        List<Map<String, Object>> postResponses = posts.stream()
+                .map(post -> {
+                    User user = post.getUser(); // Ambil user dari post
+                    UserDTO userDTO = new UserDTO(user.getId(), user.getUsername()); // Buat UserDTO
+                    
+                    List<Map<String, Object>> comments = post.getComments().stream().map(comment -> {
+                        Map<String, Object> commentData = new HashMap<>();
+                        commentData.put("commentId", comment.getId());
+                        commentData.put("content", comment.getContent());
+                        commentData.put("commentedBy", new UserDTO(comment.getUser().getId(), comment.getUser().getUsername()));
+                        commentData.put("commentedAt", comment.getCreatedAt());
+                        return commentData;
+                    }).toList();
+
+                    List<Map<String, Object>> likes = post.getLikes().stream().map(like -> {
+                        Map<String, Object> likeData = new HashMap<>();
+                        likeData.put("likeId", like.getId());
+                        likeData.put("likedBy", new UserDTO(like.getUser().getId(), like.getUser().getUsername()));
+                        return likeData;
+                    }).toList();
+                    Map<String, Object> postMap = new HashMap<>();
+                    postMap.put("postId", post.getId());
+                    postMap.put("caption", post.getCaption());
+                    postMap.put("mediaUrl", post.getMediaUrl());
+                    postMap.put("createdAt", post.getCreatedAt());
+                    postMap.put("mediaType", post.getMediaType());
+                    postMap.put("user", userDTO); 
+                    postMap.put("comments", comments);
+                    postMap.put("likes", likes);
+
+                    return postMap;
+                })
+                .toList();
+            
+        
+       
         response.put("code", "200");
         response.put("message", "Posts retrieved successfully");
-        response.put("data", data);
+        response.put("data", postResponses);
 
         return ResponseEntity.ok(response);
     }

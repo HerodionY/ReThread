@@ -1,6 +1,8 @@
 package com.reTheard.reThreard.controller;
 
+import com.reTheard.reThreard.dto.UserDTO;
 import com.reTheard.reThreard.model.Friendship;
+import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +44,18 @@ public class FriendshipController {
 
         Map<String, Object> response = new HashMap<>();
         if (followedUsers != null && !followedUsers.isEmpty()) {
+            List<Map<String, Object>> followedUsersData = followedUsers.stream()
+                    .map(friendship -> {
+                        User user = friendship.getUser();
+                        UserDTO userDTO = new UserDTO(user.getId(), user.getUsername());
+                        Map<String, Object> followedUser = new HashMap<>();
+                        followedUser.put("userId", userDTO.getId());
+                        followedUser.put("username", userDTO.getUsername());
+                        return followedUser;
+                    }).toList();
             response.put("code", "200");
             response.put("message", "Followed users retrieved successfully");
-            response.put("data", followedUsers);
+            response.put("data", followedUsersData);
             return ResponseEntity.ok(response);
         } else {
             response.put("code", "404");

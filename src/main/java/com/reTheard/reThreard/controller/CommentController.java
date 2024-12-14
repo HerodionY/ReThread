@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -95,9 +96,18 @@ public ResponseEntity<Map<String, Object>> getCommentsByPostId(@PathVariable UUI
     List<Comment> comments = commentService.getCommentsByPostId(postId);
 
     if (comments != null && !comments.isEmpty()) {
+        List<CommentDTO> commentDTOs = comments.stream()
+            .map(comment -> new CommentDTO(
+                comment.getId(),
+                comment.getUser().getId(),
+                comment.getUser().getUsername(),
+                comment.getContent(),
+                comment.getCreatedAt()
+                ))
+            .collect(Collectors.toList());
         response.put("code", "200");
         response.put("message", "Comments retrieved successfully");
-        response.put("data", comments);
+        response.put("data", commentDTOs);
         return ResponseEntity.ok(response);
     } else {
         response.put("code", "404");
