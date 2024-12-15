@@ -32,7 +32,11 @@ public class Post {
 
     
     private String caption;
-    private String mediaUrl;
+    
+    @ElementCollection
+    private List<String> mediaUrl;
+
+
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
@@ -81,6 +85,14 @@ public class Post {
 
     public void setCaption(String caption) {
         this.caption = caption;
+    }
+
+    public List<String> getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(List<String> mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 
 

@@ -1,6 +1,7 @@
 package com.reTheard.reThreard.controller;
 
 import com.reTheard.reThreard.model.LoginRequest; // Impor kelas LoginRequest
+import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.AuthService;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -20,17 +22,22 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         boolean success = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword()); // Gunakan objek authService
-        Map<String, Object> response = new HashMap<>();
-        Map<String, Object> data = new HashMap<>();
+        User user = authService.authenticateAndGetUser(loginRequest.getEmail(), loginRequest.getPassword());
         
-        if (success) {
-            data.put("Login", loginRequest);
+        if (user != null) { // Jika autentikasi berhasil
+            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
+    
+            data.put("userId", user.getId());
+            data.put("email", user.getEmail());
             response.put("code", "200");
             response.put("message", "Login successful!");
             response.put("data", data);
+    
             return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");  
-        } 
+        } else { // Jika autentikasi gagal
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("code", "401", "message", "Invalid email or password"));
+        }
     }
 }

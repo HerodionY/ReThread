@@ -1,14 +1,14 @@
 package com.reTheard.reThreard.dto;
 
 import com.reTheard.reThreard.model.User;
-
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class PostResponse {
     private UUID id;
     private String caption;
-    private String mediaUrl;
+    private List<String> mediaUrl; // Ubah menjadi List<String> untuk mendukung array Base64
     private String mediaType;
     private LocalDateTime createdAt;
     private UUID userId;
@@ -18,7 +18,7 @@ public class PostResponse {
     public PostResponse(com.reTheard.reThreard.model.Post post) {
         this.id = post.getId();
         this.caption = post.getCaption();
-        this.mediaUrl = post.getMediaUrl();
+        this.mediaUrl = post.getMediaUrl();  // Mengambil List<String> mediaUrl
         this.mediaType = post.getMediaType().toString();
         this.createdAt = post.getCreatedAt();
 
@@ -47,11 +47,11 @@ public class PostResponse {
         this.caption = caption;
     }
 
-    public String getMediaUrl() {
+    public List<String> getMediaUrl() {
         return mediaUrl;
     }
 
-    public void setMediaUrl(String mediaUrl) {
+    public void setMediaUrl(List<String> mediaUrl) {
         this.mediaUrl = mediaUrl;
     }
 

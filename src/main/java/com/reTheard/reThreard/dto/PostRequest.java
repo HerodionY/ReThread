@@ -1,14 +1,17 @@
 package com.reTheard.reThreard.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class PostRequest {
-    private UUID userId; // Hanya ID user, bukan objek User
+    private UUID userId; // Only the user ID, not the User object
     private String caption;
-    private String mediaUrl;
+    private List<String> mediaUrl;
     private LocalDateTime createdAt;
     private String mediaType;
+    private String imageData; // Base64 encoded image data
+    private String imageName; // Name of the image file to be saved
 
     // Getters and Setters
     public UUID getUserId() {
@@ -27,11 +30,11 @@ public class PostRequest {
         this.caption = caption;
     }
 
-    public String getMediaUrl() {
+    public List<String> getMediaUrl() {
         return mediaUrl;
     }
 
-    public void setMediaUrl(String mediaUrl) {
+    public void setMediaUrl(List<String> mediaUrl) {
         this.mediaUrl = mediaUrl;
     }
 
@@ -49,5 +52,21 @@ public class PostRequest {
 
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
+    }
+
+    public String getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(String imageData) {
+        this.imageData = imageData;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 }

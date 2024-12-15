@@ -12,6 +12,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/friendships")
+@CrossOrigin(origins = "*")
 public class FriendshipController {
 
     @Autowired

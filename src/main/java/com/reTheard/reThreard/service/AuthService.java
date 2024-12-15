@@ -28,6 +28,20 @@ public class AuthService {
         return false; 
     }
 
+    public User authenticateAndGetUser(String email, String password) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            // Validasi password
+            if (user.getPassword().equals(password)) { // Gunakan hashing jika password terenkripsi
+                return user; // Kembalikan objek User jika autentikasi berhasil
+            }
+        }
+        // Kembalikan null jika autentikasi gagal
+        return null;
+    }
+
    
     public User registerUser(String username, String email, String password) {
         
