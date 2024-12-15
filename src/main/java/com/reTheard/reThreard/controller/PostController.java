@@ -187,7 +187,7 @@ public class PostController {
     @GetMapping("/home-page")
     public ResponseEntity<Map<String, Object>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
         Map<String, Object> response = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
