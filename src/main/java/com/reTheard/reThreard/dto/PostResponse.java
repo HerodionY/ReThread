@@ -1,5 +1,6 @@
 package com.reTheard.reThreard.dto;
 
+import com.reTheard.reThreard.model.Media;
 import com.reTheard.reThreard.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,29 +9,29 @@ import java.util.UUID;
 public class PostResponse {
     private UUID id;
     private String caption;
-    private List<String> mediaUrl; // Ubah menjadi List<String> untuk mendukung array Base64
+    private List<Media> mediaUrl; // Assuming mediaUrl holds URLs or Base64 data
     private String mediaType;
     private LocalDateTime createdAt;
     private UUID userId;
     private String userName;
 
-    // Constructor untuk mempermudah inisialisasi
+    // Constructor for easy initialization
     public PostResponse(com.reTheard.reThreard.model.Post post) {
         this.id = post.getId();
         this.caption = post.getCaption();
-        this.mediaUrl = post.getMediaUrl();  // Mengambil List<String> mediaUrl
-        this.mediaType = post.getMediaType().toString();
+        this.mediaUrl = post.getMedia();  // Assuming List<String> for media URL or Base64
+        this.mediaType = post.getMediaType().toString();  // Enum to String conversion
         this.createdAt = post.getCreatedAt();
 
-        // Ambil informasi dari objek User
+        // Extract user details
         User user = post.getUser();
         if (user != null) {
             this.userId = user.getId();
-            this.userName = user.getUsername(); // Pastikan `User` memiliki properti `name`
+            this.userName = user.getUsername(); // Ensure 'getUsername()' is available in the User class
         }
     }
 
-    // Getters dan Setters
+    // Getters and Setters
     public UUID getId() {
         return id;
     }
@@ -47,11 +48,11 @@ public class PostResponse {
         this.caption = caption;
     }
 
-    public List<String> getMediaUrl() {
+    public List<Media> getMediaUrl() {
         return mediaUrl;
     }
 
-    public void setMediaUrl(List<String> mediaUrl) {
+    public void setMediaUrl(List<Media> mediaUrl) {
         this.mediaUrl = mediaUrl;
     }
 

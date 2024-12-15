@@ -7,11 +7,9 @@ import java.util.UUID;
 public class PostRequest {
     private UUID userId; // Only the user ID, not the User object
     private String caption;
-    private List<String> mediaUrl;
+    private List<MediaRequest> media; // List of media objects, instead of mediaUrl
     private LocalDateTime createdAt;
     private String mediaType;
-    private String imageData; // Base64 encoded image data
-    private String imageName; // Name of the image file to be saved
 
     // Getters and Setters
     public UUID getUserId() {
@@ -30,12 +28,12 @@ public class PostRequest {
         this.caption = caption;
     }
 
-    public List<String> getMediaUrl() {
-        return mediaUrl;
+    public List<MediaRequest> getMedia() {
+        return media;
     }
 
-    public void setMediaUrl(List<String> mediaUrl) {
-        this.mediaUrl = mediaUrl;
+    public void setMedia(List<MediaRequest> media) {
+        this.media = media;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -52,21 +50,5 @@ public class PostRequest {
 
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
-    }
-
-    public String getImageData() {
-        return imageData;
-    }
-
-    public void setImageData(String imageData) {
-        this.imageData = imageData;
-    }
-
-    public String getImageName() {
-        return imageName;
-    }
-
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
     }
 }

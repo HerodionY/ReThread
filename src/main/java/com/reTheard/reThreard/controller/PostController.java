@@ -5,12 +5,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import com.reTheard.reThreard.service.PostService;
+import com.reTheard.reThreard.dto.MediaRequest;
 import com.reTheard.reThreard.dto.PostRequest;
 import com.reTheard.reThreard.model.Post;
 import com.reTheard.reThreard.model.User;
 import com.reTheard.reThreard.service.UserService;
 import com.reTheard.reThreard.dto.PostResponse;
 import com.reTheard.reThreard.dto.UserDTO;
+import com.reTheard.reThreard.model.Media;
+import com.reTheard.reThreard.model.Comment;
+import com.reTheard.reThreard.model.Like;
+import com.reTheard.reThreard.service.CommentService;
+import com.reTheard.reThreard.service.LikeService;
+import com.reTheard.reThreard.service.MediaService;
+import com.reTheard.reThreard.service.FriendshipService;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +33,8 @@ import java.util.UUID;
 import java.util.List;
 import java.util.Base64;
 import java.io.File;
+
+import org.apache.logging.log4j.LogManager;
 
 
 
@@ -46,43 +56,61 @@ public class PostController {
         try {
             // Log incoming request
             System.out.println("Request received: " + postRequest);
-    
+        
             // Map request to Post
             Post post = new Post();
             post.setCaption(postRequest.getCaption());
-            List<String> mediaUrls = new ArrayList<>();
-    
+            List<Media> mediaList = new ArrayList<>();
+        
             // Handle the Base64 image data
-            if (postRequest.getImageData() != null && !postRequest.getImageData().isEmpty()) {
-                String imageData = postRequest.getImageData();
-                String imageName = postRequest.getImageName();
-                String filePath = "path/to/save/images/" + imageName;
-    
-                // Extract Base64 data (assuming it has a prefix like "data:image/jpeg;base64,")
-                String base64Image = imageData.split(",")[1];
-                byte[] decodedImage = Base64.getDecoder().decode(base64Image);
-    
-                // Save the image to the server
-                File imageFile = new File(filePath);
-                Files.write(imageFile.toPath(), decodedImage);
-    
-                // Add file path to media URLs
-                mediaUrls.add(filePath);
+            if (postRequest.getMedia() != null && !postRequest.getMedia().isEmpty()) {
+                for (MediaRequest mediaRequest : postRequest.getMedia()) {
+                    String imageData = mediaRequest.getImageData();
+                    String imageName = mediaRequest.getImageName();
+                    String imageType = mediaRequest.getImageType();
+        
+                    if (imageData != null && !imageData.isEmpty()) {
+                        // Log image data details
+                        System.out.println("Processing media: " + imageName + ", Type: " + imageType);
+        
+                        // If the imageData contains the prefix, remove it
+                        if (imageData.startsWith("data:image/")) {
+                            imageData = imageData.split(",")[1]; // Remove the prefix
+                            System.out.println("Base64 data cleaned: " + imageName);
+                        }
+        
+                        // Create Media object
+                        Media media = new Media();
+                        media.setImageName(imageName);
+                        media.setImageType(imageType);
+                        media.setImageData(imageData); // Keep Base64 string as it is
+                        media.setPost(post); // Link media to the post
+        
+                        // Add media to list
+                        mediaList.add(media);
+                    } else {
+                        System.err.println("Empty image data for media: " + imageName);
+                    }
+                }
+            } else {
+                System.out.println("No media data provided");
             }
-    
-            post.setMediaUrl(mediaUrls);
+        
+            // Set media list on the post
+            post.setMedia(mediaList);
             post.setCreatedAt(LocalDateTime.now());
-    
+        
             // Validate media type
             String mediaTypeString = postRequest.getMediaType();
             try {
                 Post.MediaType mediaType = Post.MediaType.valueOf(mediaTypeString.toUpperCase());
                 post.setMediaType(mediaType);
+                System.out.println("Media type set to: " + mediaType);
             } catch (IllegalArgumentException e) {
                 System.err.println("Invalid media type: " + mediaTypeString);
                 return ResponseEntity.status(400).body(Map.of("code", "400", "message", "Invalid media type"));
             }
-    
+        
             // Validate user
             User user = userService.getUserById(postRequest.getUserId());
             if (user == null) {
@@ -91,25 +119,27 @@ public class PostController {
             }
             post.setUser(user);
             System.out.println("User validated: " + user);
-    
+        
             // Save post
             Post createdPost = postService.createPost(post);
             if (createdPost == null) {
                 System.err.println("Failed to create post");
                 return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Failed to create post"));
             }
-    
+        
             // Success response
             System.out.println("Post created successfully: " + createdPost);
             PostResponse postResponse = new PostResponse(createdPost);
             return ResponseEntity.ok(Map.of("code", "200", "message", "Post created successfully", "data", postResponse));
-    
+        
         } catch (Exception e) {
             e.printStackTrace(); // Log full stack trace
-            return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Internal server error"));
+            return ResponseEntity.status(500).body(Map.of("code", "500", "message", "Internal server error", "error", e.getMessage()));
         }
     }
     
+
+      
 
 
 
@@ -187,7 +217,7 @@ public class PostController {
                     Map<String, Object> postMap = new HashMap<>();
                     postMap.put("postId", post.getId());
                     postMap.put("caption", post.getCaption());
-                    postMap.put("mediaUrl", post.getMediaUrl());
+                    postMap.put("mediaUrl", post.getMedia());
                     postMap.put("createdAt", post.getCreatedAt());
                     postMap.put("mediaType", post.getMediaType());
                     postMap.put("user", userDTO); 

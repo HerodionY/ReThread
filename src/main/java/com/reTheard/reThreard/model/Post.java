@@ -1,20 +1,14 @@
 package com.reTheard.reThreard.model;
 
-
 import jakarta.persistence.*;
 import java.util.UUID;
-
-import org.springframework.cglib.core.Local;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.Getter;
 import lombok.Setter;
 import java.util.Set;
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 @Getter
 @Setter
@@ -30,19 +24,18 @@ public class Post {
     @JsonBackReference
     private User user;
 
-    
     private String caption;
-    
-    @ElementCollection
-    private List<String> mediaUrl;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Media> media;  // Changed from mediaUrl to List<Media>
 
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Comment> comments;
 
@@ -60,41 +53,7 @@ public class Post {
         this.id = id;
     }
 
-    
+    public Post() {}
 
     // Getter dan Setter
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getCaption() {
-        return caption;
-    }
-
-    public void setCaption(String caption) {
-        this.caption = caption;
-    }
-
-    public List<String> getMediaUrl() {
-        return mediaUrl;
-    }
-
-    public void setMediaUrl(List<String> mediaUrl) {
-        this.mediaUrl = mediaUrl;
-    }
-
-
-    public Post() {}
 }
